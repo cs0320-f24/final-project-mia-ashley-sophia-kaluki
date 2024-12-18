@@ -249,7 +249,7 @@ def scrape_eventbrite_events():
 
 
             event_url = a.get('href')
-            print("Event url: ", event_url)
+            
 
             if event_url: 
                 driver = get_driver()
@@ -267,7 +267,7 @@ def scrape_eventbrite_events():
                 soup2 = BeautifulSoup(driver.page_source, 'html.parser')
 
                 og_title = a.get('aria-label', 'No title')
-                title = og_title.replace("View", "")
+                title = og_title.replace("View", "").replace('\"', '')
                 category = a.get('data-event-category')  
 
                 
@@ -289,7 +289,6 @@ def scrape_eventbrite_events():
 
                 if time_and_date_info: 
                     split=time_and_date_info.text.split("·")
-                    print(split)
                     if len(split) > 1:
                         date_info = split[0]
                         time_info = split[1]
@@ -302,7 +301,7 @@ def scrape_eventbrite_events():
                 source=Source.EVENTBRITE,
                 id=generate_event_id(event_id_map),
                 title=title,
-                description="",  # We could fetch this from the event page if needed
+                description="",
                 image=img_url,
                 date=date_info,
                 start_time=time_info, 
@@ -350,14 +349,17 @@ def get_event_description_and_date(event, source: Source) -> Description_and_Dat
         try: 
          driver.get(full_url)
         except WebDriverException as e:
-            return Description_and_Date("No description available", "No date available")
+            return Description_and_Date(
+                "No description available", "No date available")
 
         try:
             WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "lw_calendar_event_description"))
+            EC.presence_of_element_located((
+                By.CLASS_NAME, "lw_calendar_event_description"))
         )
         except TimeoutException:
-            return Description_and_Date("No description available", "No date available")
+            return Description_and_Date(
+                "No description available", "No date available")
 
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -385,8 +387,8 @@ def get_event_description_and_date(event, source: Source) -> Description_and_Dat
 
 def get_event_time(event, source: Source) -> str:
     """
-    For Brown events, this function extracts the time information from Event@Brown
-    and creates an instance of the time class.
+    For Brown events, this function extracts the time information from 
+    Event@Brown and creates an instance of the time class.
 
     Time is often included in the date string for eventbrite so this function 
     is not used for that source.
@@ -439,7 +441,8 @@ def get_location(event, source: Source) -> Location:
     elif source == Source.EVENTBRITE:
         a = event.find("a")
         if a:
-            location_name = a.get('data-event-location', 'Location not specified')
+            location_name = a.get('data-event-location', 
+                                  'Location not specified')
             return Location(location_name)
     
     return Location("Location not specified")
@@ -474,7 +477,8 @@ def main():
     """
 
     if len(sys.argv) < 2:
-        print(json.dumps({"result": "error", "error": "Source parameter is required"}))
+        print(json.dumps({"result": "error", "error": "Source parameter is" + 
+                          "required"}))
         sys.exit(1)
     
     source = sys.argv[1]
@@ -485,24 +489,29 @@ def main():
         eventbrite_events = scrape_eventbrite_events()
         
         if source.lower() == "brown":
-            json_ready = json.dumps([event.to_json() for event in brown_events]).encode('utf-8').decode('unicode_escape')
+            json_ready = json.dumps([event.to_json() for event in brown_events]
+                                    ).encode('utf-8').decode('unicode_escape')
             print(json_ready)
             return json_ready
             
 
         elif source.lower() == "eventbrite":
-            json_ready = json.dumps([event.to_json() for event in eventbrite_events])
+            json_ready = json.dumps([event.to_json() for event in 
+                                     eventbrite_events]).encode('utf-8').decode(
+                                         'unicode_escape')
             print(json_ready)
             return json_ready
 
         elif source.lower() == "both":
             all_events = json.dumps([event.to_json() for event in brown_events]
-            ).encode('utf-8').decode('unicode_escape') + json.dumps([event.to_json() for event in eventbrite_events])
+            ).encode('utf-8').decode('unicode_escape') + json.dumps([
+                event.to_json() for event in eventbrite_events])
             print(all_events)
             return json_ready
 
         elif ((source.lower() != "brown") or (source.lower() != "eventbrite")):
-            print(json.dumps({"result": "error", "error": "Invalid event source: please enter brown or eventbrite"}))
+            print(json.dumps({"result": "error", "error": "Invalid event source: "
+                              + "please enter brown or eventbrite"}))
             sys.exit(1)
 
     except Exception as e:
