@@ -4,7 +4,7 @@ src/main/java/edu/brown/cs/student/main/server/Objects/Event.java 2024-12-17T16:
 src/main/java/edu/brown/cs/student/main/server/Objects/EventDatasource.java 2024-12-17T16:30:34.396673679Z
 src/main/java/edu/brown/cs/student/main/server/Objects/Location.java 2024-12-18T01:03:08.345682708Z
 src/main/java/edu/brown/cs/student/main/server/Objects/Utils.java 2024-12-17T16:30:34.396994113Z
-src/main/java/edu/brown/cs/student/main/server/Server.java 2024-12-18T03:15:48.561225666Z
+src/main/java/edu/brown/cs/student/main/server/Server.java 2024-12-17T20:45:29.268977206Z
 src/main/java/edu/brown/cs/student/main/server/handlers/Events/FetchEventsHandler.java 2024-12-17T16:30:34.397901773Z
 src/main/java/edu/brown/cs/student/main/server/handlers/Events/ScraperHandler.java 2024-12-18T01:03:10.123566916Z
 src/main/java/edu/brown/cs/student/main/server/handlers/Events/ScraperUtility.java 2024-12-17T16:30:34.398246765Z
