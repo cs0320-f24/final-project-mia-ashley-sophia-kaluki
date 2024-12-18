@@ -96,7 +96,7 @@ public class ScraperHandler implements Route {
         eventData.put("event_name", location.getName());
         eventData.put("latitude", location.getLatitude());
         eventData.put("longitude", location.getLongitude());
-        eventData.put("url", location.getUrl());
+        eventData.put("address", location.getAddress());
       }
 
       this.eventStorageHandler.addDocument("activities", eventID, eventData);

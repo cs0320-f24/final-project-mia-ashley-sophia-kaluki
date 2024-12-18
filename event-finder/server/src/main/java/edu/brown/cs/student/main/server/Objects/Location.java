@@ -12,14 +12,14 @@ public class Location {
   @Json(name = "longitude")
   private String longitude;
 
-  @Json(name = "url")
-  private String url;
+  @Json(name = "address")
+  private String address;
 
-  public Location(String name, String latitude, String longitude, String url) {
+  public Location(String name, String latitude, String longitude, String address) {
     this.name = name;
     this.latitude = latitude;
     this.longitude = longitude;
-    this.url = url;
+    this.address = address;
   }
 
   public String getName() {
@@ -34,8 +34,8 @@ public class Location {
     return this.longitude;
   }
 
-  public String getUrl() {
-    return this.url;
+  public String getAddress() {
+    return this.address;
   }
 
   public void setName(String name) {
@@ -50,7 +50,7 @@ public class Location {
     this.longitude = longitude;
   }
 
-  public void setUrl(String url) {
-    this.url = url;
+  public void setUrl(String address) {
+    this.address = address;
   }
 }

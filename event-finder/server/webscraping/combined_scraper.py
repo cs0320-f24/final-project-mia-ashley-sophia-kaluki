@@ -34,18 +34,18 @@ class Location:
     location infortmation for an event
 
     """
-    def __init__(self, name, lat=None, long=None, url=None):
+    def __init__(self, name, lat=None, long=None, address=None):
         self.name = name
         self.lat = lat
         self.long = long
-        self.url = url
+        self.address = address
     
     def to_json(self):
         return {
             "name": self.name,
             "latitude": self.lat,
             "longitude": self.long,
-            "url": self.url }
+            "address": self.address }
 
 class Event:
     """
@@ -186,9 +186,11 @@ def scrape_events(source: Source):
     events = []
     
     event_containers = soup.find_all("div", class_="lw_cal_event_list")
+    ## all od the events are organized by date so this allows us to look into each date
     for event_list in event_containers:
         event_items = soup.find_all("div", class_= "lw_cal_event")
-        for item in event_items:
+
+        for item in event_items: # for every event in each date
             source = Source.BROWN
             id = generate_event_id(event_id_map)
             title = get_event_title(item, source) # done for Brown
@@ -234,6 +236,7 @@ def scrape_eventbrite_events():
         
         sections = soup.find_all('section', class_='event-card-details')
         for section in sections:
+
             a = section.a
             if not a:
                 continue
@@ -243,24 +246,56 @@ def scrape_eventbrite_events():
                 continue
                 
             ids.add(event_id)
-            
-            # Retrieves event details
-            og_title = a.get('aria-label', 'No title')
-            title = og_title.replace("View", "")
-            category = a.get('data-event-category')
-            location_name = a.get('data-event-location', 'Location not specified')
-            paid = a.get('data-event-paid-status') == 'paid'
-            date_str = section.p.text if section.p else None
-            split = date_str.split(",")
-            if len(split) == 3:
-                date_info = split[1]
-                time_info = split[2]
-            # Get image
-            image = section.parent.find('img', class_='event-card-image')
-            img_url = image['src'] if image is not None else "No Image to Display"
-            
-            # Create Location object
-            location = Location(name=location_name)
+
+
+            event_url = a.get('href')
+            print("Event url: ", event_url)
+
+            if event_url: 
+                driver = get_driver()
+                try:
+                    driver.get(event_url)
+                except WebDriverException as e:
+                    return "No event specific url"
+                try:
+                    WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CLASS_NAME, 
+                        "event_details")))
+                except TimeoutException:
+                    "Issue with getting event_url for Eventbrite"
+                    
+                soup2 = BeautifulSoup(driver.page_source, 'html.parser')
+
+                og_title = a.get('aria-label', 'No title')
+                title = og_title.replace("View", "")
+                category = a.get('data-event-category')  
+
+                
+                address = "No address provided" 
+
+                location_info = soup2.find("p", class_="location-info__address-text")
+                location_name = location_info.text.strip() if location_info else "No location information"
+                address_info = location_info.next_element.next_element.text.strip() if location_info else "No address information"
+
+                location = Location(name=location_name, address=address_info)
+
+                paid = a.get('data-event-paid-status') == 'paid'
+
+
+                time_and_date_info= soup2.find("span", class_="date-info__full-datetime")
+                date_info="No date information provided"
+                time_info="No time information provided"
+
+
+                if time_and_date_info: 
+                    split=time_and_date_info.text.split("·")
+                    print(split)
+                    if len(split) > 1:
+                        date_info = split[0]
+                        time_info = split[1]
+                        
+                image = section.parent.find('img', class_='event-card-image')
+                img_url = image['src'] if image is not None else "No Image to Display"
             
             # Create Event object
             event = Event(
@@ -309,7 +344,7 @@ def get_event_description_and_date(event, source: Source) -> Description_and_Dat
     """
     if source == Source.BROWN:
         event_url = event.find("a")["href"]
-        full_url = "https://events.brown.edu" + event_url  # Make the URL absolute
+        full_url = "https://events.brown.edu" + event_url
 
         driver = get_driver()
         try: 
@@ -317,8 +352,6 @@ def get_event_description_and_date(event, source: Source) -> Description_and_Dat
         except WebDriverException as e:
             return Description_and_Date("No description available", "No date available")
 
-
-    
         try:
             WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "lw_calendar_event_description"))
