@@ -12,7 +12,7 @@ import java.util.List;
 public class ScraperUtility {
   private static final String scraper_path = "webscraping/combined_scraper.py";
   private static final String env_path =
-      "/Users/kkithome/Desktop/csci 0320/final/final-project-mia-ashley-sophia-kaluki/"
+      "/Users/kkithome/Desktop/previous courses/csci 0320/final/final-project-mia-ashley-sophia-kaluki/"
           + "event-finder/bin/python";
 
   public static List<Event> scrapeData(String source) throws IOException, InterruptedException {
